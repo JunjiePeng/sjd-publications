@@ -1155,3 +1155,352 @@ details[open] > summary > svg {
     display: none;
   }
 }
+
+/* Full literature catalogue shares the existing navy and teal research surface. */
+.nav-tabs {
+  overflow-x: auto;
+  justify-content: flex-start;
+}
+.nav-tab {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.catalogue-heading h1 {
+  max-width: 840px;
+  font-size: clamp(1.9rem, 3vw, 2.7rem);
+}
+.catalogue-total {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+  min-width: 160px;
+}
+.catalogue-total strong {
+  font-size: 2.6rem;
+  line-height: 1.25;
+  color: var(--primary);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.catalogue-total span {
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+}
+.refresh-status {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  padding: 12px 0;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+.refresh-warning {
+  color: #86500c;
+  background: #fff6e6;
+  padding: 12px 16px;
+  border: 1px solid #e7c488;
+  border-radius: 8px;
+}
+.refresh-warning .status-dot {
+  background: #a06514;
+}
+.catalogue-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 20px;
+}
+.catalogue-quick button {
+  font-size: 0.875rem;
+  background: #fff;
+  height: auto;
+  min-height: 38px;
+  white-space: normal;
+}
+.catalogue-controls {
+  padding: 20px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.catalogue-controls .search-box {
+  width: 100%;
+  min-height: 48px;
+}
+.catalogue-controls .search-box input {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+}
+.catalogue-filter-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1.2fr 1fr 1fr;
+  gap: 14px;
+  margin-top: 16px;
+}
+.catalogue-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  font-size: 0.875rem;
+}
+.catalogue-filter > span {
+  font-weight: 600;
+}
+.catalogue-filter .filter-select {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 40px;
+}
+.catalogue-year-range {
+  display: flex;
+  gap: 8px;
+}
+.catalogue-year-range label {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.catalogue-year-range input {
+  width: 100%;
+  min-height: 40px;
+  font-weight: 400;
+}
+.extra-filters {
+  margin-top: 14px;
+  font-size: 0.875rem;
+}
+.extra-filters summary {
+  cursor: pointer;
+  color: var(--primary);
+}
+.extra-filters .catalogue-filter {
+  max-width: 540px;
+  margin-top: 12px;
+}
+.catalogue-loading {
+  margin: 30px 0;
+  padding: 30px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.catalogue-loading output {
+  display: block;
+  margin-bottom: 14px;
+}
+.catalogue-loading p {
+  margin-bottom: 14px;
+}
+.results-line .catalogue-filter {
+  min-width: 250px;
+}
+.catalogue-pagination {
+  margin: 18px 0;
+}
+.catalogue-pagination ul {
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+.catalogue-pagination button {
+  font-size: 0.875rem;
+}
+.page-count {
+  padding: 0 12px;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+.catalogue-publication .publication-year {
+  font-size: 1.3rem;
+  overflow-wrap: anywhere;
+}
+.catalogue-publication .publication-year > strong {
+  font-size: 1rem;
+}
+.catalogue-publication .publication-year span {
+  font-size: 0.875rem;
+}
+.catalogue-publication .authors {
+  overflow-wrap: anywhere;
+}
+.catalogue-publication .topic-tags {
+  margin: 10px 0;
+}
+.topic-tags > span {
+  color: #326574;
+  font-size: 0.8125rem;
+  background: #edf5f6;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.record-facts {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 6px 16px;
+  font-size: 0.875rem;
+  margin: 0 0 16px;
+}
+.record-facts dt {
+  font-weight: 600;
+}
+.record-facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.catalogue-coverage {
+  margin-top: 32px;
+}
+.catalogue-coverage code {
+  display: block;
+  font-size: 0.8125rem;
+  background: var(--muted);
+  padding: 12px;
+  border-radius: 6px;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  margin: 8px 0 14px;
+}
+.catalogue-coverage details summary {
+  color: var(--primary);
+  cursor: pointer;
+}
+.catalogue-landscape {
+  margin: 32px 0 40px;
+}
+.landscape-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.landscape-panel {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px;
+  min-width: 0;
+}
+.landscape-panel h3 {
+  font-size: 1.1rem;
+}
+.year-bars {
+  display: flex;
+  gap: 3px;
+  align-items: end;
+  overflow-x: auto;
+  margin-top: 32px;
+  padding-bottom: 6px;
+}
+.year-bars button {
+  flex: 1;
+  min-width: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+  border: none;
+  background: transparent;
+  padding: 0 1px;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+.year-bar-track {
+  display: flex;
+  align-items: end;
+  height: 145px;
+  width: 100%;
+}
+.year-bar-track > span {
+  width: 100%;
+  background: #267c86;
+  border-radius: 2px 2px 0 0;
+}
+.year-bars button:hover .year-bar-track > span {
+  background: #153b50;
+}
+.omics-links {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 20px;
+  margin-top: 12px;
+}
+.omics-links button {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 9px 0;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  text-align: left;
+  font-size: 0.875rem;
+  color: #245666;
+}
+.omics-links button > span {
+  flex: 1;
+}
+.omics-links button > strong {
+  font-variant-numeric: tabular-nums;
+}
+.snapshot .text-link {
+  margin-top: 10px;
+  color: inherit;
+}
+@media (max-width: 1100px) {
+  .catalogue-filter-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .landscape-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 640px) {
+  .catalogue-heading {
+    align-items: flex-start;
+  }
+  .catalogue-total {
+    text-align: left;
+  }
+  .catalogue-total strong {
+    font-size: 2.1rem;
+  }
+  .catalogue-controls {
+    padding: 14px;
+  }
+  .catalogue-filter-grid {
+    grid-template-columns: 1fr;
+  }
+  .catalogue-year-range input {
+    font-size: 1rem;
+  }
+  .record-facts {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .record-facts dd {
+    margin-bottom: 10px;
+  }
+  .results-line .catalogue-filter {
+    width: 100%;
+    min-width: 0;
+  }
+  .landscape-panel {
+    padding: 18px;
+  }
+  .omics-links {
+    grid-template-columns: 1fr;
+  }
+  .page-count {
+    padding: 0 5px;
+  }
+  .catalogue-pagination button {
+    padding: 4px 8px;
+  }
+}
