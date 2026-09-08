@@ -25,6 +25,10 @@
 
 ## Research interpretation
 
+- [x] Add an interactive overview with linked evidence and open questions.
+- [x] Add a manually curated, searchable starting library with evidence-type labels.
+- [ ] Review the initial editorial summaries and extend childhood-onset coverage.
+
 - [ ] Define the summary format and review workflow.
 - [ ] Add a small, reviewed collection of research summaries with source links.
 
