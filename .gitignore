@@ -39,3 +39,5 @@ next-env.d.ts
 
 /.pnpm-store/
 *.tsbuildinfo
+/.cache/
+__pycache__/

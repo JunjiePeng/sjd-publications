@@ -1,5 +1,5 @@
 const diseaseQuery =
-  '("Sjogren\'s Syndrome"[MeSH Terms] OR Sjogren*[Title/Abstract] OR Sjögren*[Title/Abstract])';
+  '("Sjogren\'s Syndrome"[MeSH Terms] OR Sjogren*[Title/Abstract] OR Sjögren*[Title/Abstract] OR Sjøgren*[Title/Abstract] OR Sjoegren*[Title/Abstract] OR Sjogren*[Other Term] OR Sjögren*[Other Term] OR Sjøgren*[Other Term] OR Sjoegren*[Other Term])';
 
 export function pubmedUrl(topic = '') {
   const query = topic.trim()
@@ -11,7 +11,7 @@ export function pubmedUrl(topic = '') {
 export const focusedSearches = [
   {
     title: 'All SjD research',
-    detail: 'Browse the most recently added Sjögren’s records.',
+    detail: 'Browse Sjögren’s records by publication date.',
     query: '',
   },
   {

@@ -9,12 +9,15 @@
 
 ## Publication dashboard
 
-- [ ] Validate a broad SjD query against known relevant publications.
-- [ ] Retrieve a first real dataset from PubMed and deduplicate records.
-- [ ] Add an automatic refresh workflow with a visible last-success time.
-- [ ] Show a searchable publication list with date, topic and study-type filters.
-- [ ] Create a dedicated cSjD filter and check its recall manually.
-- [ ] Handle loading, empty, failed-update and stale-data states.
+- [x] Validate a broad SjD query against known relevant publications.
+- [x] Retrieve complete PubMed and Europe PMC search results and deduplicate identifiers.
+- [x] Add a weekly automatic refresh workflow with a visible last-success time.
+- [x] Show a searchable publication catalogue with year, omics, study-design and original publication-type filters.
+- [x] Add a childhood-related discovery filter.
+- [ ] Manually evaluate childhood-filter precision and recall beyond known examples.
+- [x] Handle loading, empty, failed-update and stale-data states.
+- [x] Include all matching ClinicalTrials.gov registrations and distinguish posted results.
+- [x] Add interactive publication-year and molecular/omics navigation.
 
 ## Personal workflow
 

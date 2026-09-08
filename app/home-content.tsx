@@ -16,8 +16,8 @@ export default function PubMedSearch() {
           <p className="eyebrow">03 / Search the wider literature</p>
           <h1>Find publications on PubMed</h1>
           <p className="subtitle">
-            Explore Sjögren’s disease and childhood-onset SjD beyond the curated
-            collection.
+            Explore Sjögren’s disease and childhood-onset SjD directly at the
+            source, including changes since the latest catalogue refresh.
           </p>
         </div>
       </div>
@@ -38,7 +38,7 @@ export default function PubMedSearch() {
           </div>
           <p className="hint" id="search-hint">
             Sjögren’s is included automatically. Results open on PubMed, with
-            the newest additions first.
+            the newest publications first.
           </p>
         </form>
       </section>

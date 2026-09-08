@@ -1,8 +1,14 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import {
+  PublicationCatalogue,
+  StudyCatalogue,
+  CatalogueLandscape,
+  useManifest,
+} from './catalogue';
+import { type CatalogueFilters } from '@/lib/catalogue';
 import PubMedSearch from './home-content';
-import { pubmedUrl, focusedSearches } from '@/lib/pubmed';
-import { flushSync } from 'react-dom';
+
 import {
   ArrowUpRight,
   ArrowRight,
@@ -111,18 +117,33 @@ function Footer() {
   return (
     <footer className="footer">
       <span>
-        A curated selection, not a systematic review or treatment guide.
-        Manually maintained.
+        Broad literature catalogue with a selected editorial overview. Read the
+        original sources to assess the evidence.
       </span>
       <a href="https://github.com/JunjiePeng/sjd-publications">
         Project on GitHub ↗
       </a>
-      <span>Evidence checked 08 Sep 2026</span>
+      <span>Overview reviewed 08 Sep 2026</span>
     </footer>
   );
 }
 export default function Home() {
-  const [view, setView] = useState('overview');
+  const [view, setView] = useState('publications');
+  const {
+    manifest,
+    error: manifestError,
+    retry: retryManifest,
+  } = useManifest();
+  const [catalogueInitial, setCatalogueInitial] = useState<
+    Partial<CatalogueFilters>
+  >({});
+  const [catalogueVisit, setCatalogueVisit] = useState(0);
+  function openCatalogue(filters: Partial<CatalogueFilters>) {
+    setCatalogueInitial(filters);
+    setCatalogueVisit((v) => v + 1);
+    setView('publications');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
   const [selected, setSelected] = useState('therapies');
   const [query, setQuery] = useState('');
   const [topic, setTopic] = useState('all');
@@ -136,96 +157,9 @@ export default function Home() {
     setTopic(id);
     setQuery('');
     setKind('all');
-    setView('publications');
+    setView('readings');
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
-  useEffect(() => {
-    type Tool = {
-      name: string;
-      title: string;
-      description: string;
-      inputSchema: object;
-      annotations: object;
-      execute: (input: unknown) => unknown;
-    };
-    const context = (
-      document as Document & {
-        modelContext?: {
-          registerTool: (
-            tool: Tool,
-            options: { signal: AbortSignal },
-          ) => void | Promise<void>;
-        };
-      }
-    ).modelContext;
-    if (!context?.registerTool) return;
-    const lifecycle = new AbortController();
-    const tool: Tool = {
-      name: 'search_sjd_publications',
-      title: 'Search SjD publications',
-      description:
-        'Search the curated SjD library and display matching records. This changes the visible publication filters.',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          query: { type: 'string' },
-          topic: {
-            type: 'string',
-            enum: ['all', ...researchAreas.map((a) => a.id)],
-          },
-          kind: { type: 'string', enum: ['all', ...kinds] },
-        },
-        required: ['query'],
-        additionalProperties: false,
-      },
-      annotations: { readOnlyHint: false, untrustedContentHint: true },
-      execute(input) {
-        if (!input || typeof input !== 'object')
-          throw new Error('Expected an object.');
-        const args = input as Record<string, unknown>;
-        if (
-          typeof args.query !== 'string' ||
-          args.query.length > 500 ||
-          Object.keys(args).some((k) => !['query', 'topic', 'kind'].includes(k))
-        )
-          throw new Error('Invalid search input.');
-        const t = args.topic ?? 'all';
-        const k = args.kind ?? 'all';
-        if (
-          typeof t !== 'string' ||
-          !['all', ...researchAreas.map((a) => a.id)].includes(t) ||
-          typeof k !== 'string' ||
-          !['all', ...kinds].includes(k)
-        )
-          throw new Error('Unknown topic or source type.');
-        const result = filterPublications(args.query, t, k);
-        flushSync(() => {
-          setQuery(args.query as string);
-          setTopic(t);
-          setKind(k);
-          setSort('newest');
-          setView('publications');
-        });
-        return {
-          count: result.length,
-          records: result.map((p) => ({
-            title: p.title,
-            year: p.year,
-            kind: p.kind,
-            url: p.url,
-          })),
-        };
-      },
-    };
-    try {
-      void Promise.resolve(
-        context.registerTool(tool, { signal: lifecycle.signal }),
-      ).catch(() => {});
-    } catch {
-      /* Optional browser capability. */
-    }
-    return () => lifecycle.abort();
-  }, []);
   return (
     <>
       <a className="skip-link" href="#main-content">
@@ -258,20 +192,75 @@ export default function Home() {
         <div className="nav-wrap">
           <div className="shell">
             <TabsList variant="line" className="nav-tabs">
+              <TabsTrigger value="publications" className="nav-tab">
+                <BookOpen size={17} /> Publications
+                {manifest && (
+                  <span className="nav-count">
+                    {manifest.counts.publications.toLocaleString()}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="studies" className="nav-tab">
+                <FlaskConical size={17} /> Registered studies
+                {manifest && (
+                  <span className="nav-count">
+                    {manifest.counts.registeredStudies.toLocaleString()}
+                  </span>
+                )}
+              </TabsTrigger>
               <TabsTrigger value="overview" className="nav-tab">
                 <Network size={17} /> Research overview
               </TabsTrigger>
-              <TabsTrigger value="publications" className="nav-tab">
-                <BookOpen size={17} /> Publications{' '}
-                <span className="nav-count">{publications.length}</span>
+              <TabsTrigger value="readings" className="nav-tab">
+                Selected readings
               </TabsTrigger>
               <TabsTrigger value="pubmed" className="nav-tab">
-                <Search size={17} /> Search PubMed
+                <Search size={17} /> PubMed search
               </TabsTrigger>
             </TabsList>
           </div>
         </div>
         <main id="main-content">
+          <TabsContent value="publications" className="page shell">
+            {manifest ? (
+              <PublicationCatalogue
+                key={catalogueVisit}
+                manifest={manifest}
+                initial={catalogueInitial}
+              />
+            ) : (
+              <div className="catalogue-loading">
+                {manifestError ? (
+                  <>
+                    <h1>Catalogue temporarily unavailable</h1>
+                    <p>Please retry the download.</p>
+                    <button className="text-link" onClick={retryManifest}>
+                      Retry
+                    </button>
+                  </>
+                ) : (
+                  <output>Loading catalogue coverage…</output>
+                )}
+              </div>
+            )}
+            <Footer />
+          </TabsContent>
+          <TabsContent value="studies" className="page shell">
+            {manifest ? (
+              <StudyCatalogue manifest={manifest} />
+            ) : (
+              <div className="catalogue-loading">
+                {manifestError ? (
+                  <button className="text-link" onClick={retryManifest}>
+                    Retry study catalogue
+                  </button>
+                ) : (
+                  <output>Loading study coverage…</output>
+                )}
+              </div>
+            )}
+            <Footer />
+          </TabsContent>
           <TabsContent value="overview" className="page shell">
             <div className="heading">
               <div>
@@ -296,15 +285,22 @@ export default function Home() {
                 </h2>
               </div>
               <div>
-                <p className="eyebrow">In this collection</p>
+                <p className="eyebrow">Full research catalogue</p>
                 <div className="snapshot-stat">
-                  {
-                    publications.filter((p) => p.kind === 'Journal article')
-                      .length
-                  }
-                  <span>journal articles</span>
+                  {manifest
+                    ? manifest.counts.publications.toLocaleString()
+                    : '…'}
+                  <span>publication records</span>
                 </div>
-                <p>Plus conference and development updates.</p>
+                <p>
+                  {manifest
+                    ? manifest.counts.registeredStudies.toLocaleString()
+                    : '…'}{' '}
+                  registered studies · all publication years
+                </p>
+                <button className="text-link" onClick={() => openCatalogue({})}>
+                  Browse the catalogue <ArrowRight size={16} />
+                </button>
               </div>
               <div>
                 <p className="eyebrow">A central research question</p>
@@ -312,9 +308,12 @@ export default function Home() {
                 <p>Connecting biology to patient outcomes.</p>
               </div>
             </section>
+            {manifest && (
+              <CatalogueLandscape manifest={manifest} open={openCatalogue} />
+            )}
             <div className="section-heading">
               <div>
-                <h2>Explore the research</h2>
+                <h2>Selected findings & open questions</h2>
                 <p>
                   Select an area to see its findings and unanswered questions.
                 </p>
@@ -377,7 +376,7 @@ export default function Home() {
                   className="text-link"
                   onClick={() => showPapers(area.id)}
                 >
-                  Explore publications in this area <ArrowRight size={16} />
+                  Read selected sources in this area <ArrowRight size={16} />
                 </button>
                 <span className="source-note">
                   Editorial synthesis · see each source’s design and
@@ -389,16 +388,17 @@ export default function Home() {
               <div>
                 <strong>Looking for childhood-onset SjD?</strong>
                 <p>
-                  This curated overview mainly covers adult studies. Explore the
-                  dedicated childhood literature search.
+                  The catalogue includes childhood-related publications and
+                  studies. The editorial summaries below remain mainly
+                  adult-focused.
                 </p>
               </div>
-              <a
+              <button
                 className="text-link"
-                href={pubmedUrl(focusedSearches[1].query)}
+                onClick={() => openCatalogue({ population: 'childhood' })}
               >
-                Childhood SjD on PubMed <ArrowUpRight size={16} />
-              </a>
+                Childhood SjD publications <ArrowRight size={16} />
+              </button>
             </aside>
             <section className="treatment-section">
               <div className="section-heading">
@@ -490,13 +490,14 @@ export default function Home() {
               </summary>
               <div className="method-grid">
                 <div>
-                  <h3>How this collection was assembled</h3>
+                  <h3>How the editorial overview was assembled</h3>
                   <p>
                     A selective starting collection of landmark classification
                     and outcome papers, patient-stratification studies, recent
                     tissue research and therapeutic developments. Sources were
-                    checked on 8 September 2026; this is not an exhaustive or
-                    automatically updating literature search.
+                    checked on 8 September 2026. These selected interpretations
+                    are separate from the complete, automatically refreshed
+                    catalogue.
                   </p>
                   <p>
                     Publication titles are shortened for readability. Dates use
@@ -531,14 +532,15 @@ export default function Home() {
             </details>
             <Footer />
           </TabsContent>
-          <TabsContent value="publications" className="page shell">
+          <TabsContent value="readings" className="page shell">
             <div className="heading">
               <div>
-                <p className="eyebrow">02 / Publication library</p>
-                <h1>Read the evidence</h1>
+                <p className="eyebrow">Selected editorial reading list</p>
+                <h1>Selected readings, with context</h1>
                 <p className="subtitle">
-                  Selected research and dated updates, with findings and
-                  limitations side by side.
+                  References supporting the overview, with findings and
+                  limitations. The Publications tab contains the full research
+                  catalogue.
                 </p>
               </div>
               <p className="date-stamp">
