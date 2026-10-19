@@ -21,6 +21,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
+from sample_labels import sample_annotations
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "public/data"
@@ -141,6 +142,7 @@ def epmc_record(raw):
         'indexedDate': raw.get('firstIndexDate', ''),
         'sourceUpdated': raw.get('dateOfRevision', ''),
         'types': types, 'methods': methods, 'studyTypes': study,
+        'samples': sample_annotations(title, raw.get('abstractText', ''), terms + keywords, types),
         'childhood': childhood, 'language': raw.get('language', ''),
         'terms': sorted(set(terms + keywords)),
         'sources': ['PubMed / Europe PMC' if pmid else 'Europe PMC preprint' if raw['source'] == 'PPR' else 'Europe PMC'],
@@ -298,6 +300,7 @@ def pubmed_record(node):
         'indexedDate': xml_date(node.find('.//PubMedPubDate[@PubStatus="pubmed"]')),
         'sourceUpdated': xml_date(citation.find('DateRevised')),
         'types': types, 'methods': methods, 'studyTypes': study, 'childhood': childhood,
+        'samples': sample_annotations(title, abstract, terms, types),
         'language': xmltext(article, 'Language'), 'terms': sorted(set(terms)), 'sources': ['PubMed'],
         'url': f'https://pubmed.ncbi.nlm.nih.gov/{pmid}/', 'excluded': unrelated(title, terms),
     }
@@ -407,6 +410,11 @@ def deduplicate(records):
             existing['childhood'] = existing['childhood'] or record['childhood']
             existing['excluded'] = existing['excluded'] and record['excluded']
             existing['pmcid'] = existing['pmcid'] or record['pmcid']
+            samples = {sample['name']: sample for sample in existing.get('samples', [])}
+            for sample in record.get('samples', []):
+                if samples.get(sample['name'], {}).get('evidence') != 'sampling':
+                    samples[sample['name']] = sample
+            existing['samples'] = [samples[name] for name in sorted(samples)]
             ids[record['id']] = match
             duplicates += 1
         else:
@@ -429,7 +437,7 @@ def refresh(resume=False):
         for chunk in old_manifest['chunks']:
             for r in json.loads((OUTPUT / chunk['file']).read_text()):
                 previous[r['id']] = r['firstSeen']
-    cache_key = hashlib.sha256((EPMC_QUERY + PUBMED_QUERY + date.today().isoformat() + Path(__file__).read_text()).encode()).hexdigest()[:16]
+    cache_key = hashlib.sha256((EPMC_QUERY + PUBMED_QUERY + date.today().isoformat() + Path(__file__).read_text() + (ROOT / 'scripts/sample_labels.py').read_text()).encode()).hexdigest()[:16]
     cache = ROOT / '.cache/catalogue' / cache_key
     if cache.exists() and not resume:
         shutil.rmtree(cache)
@@ -473,6 +481,9 @@ def refresh(resume=False):
                        'omics': sum(bool(r['methods']) for r in records),
                        'duplicatesMerged': duplicates, 'excludedPublications': len(excluded), 'excludedStudies': len(excluded_trials)},
             'years': dict(sorted(years.items())), 'methods': dict(sorted(methods.items())),
+            'sampleLabelsVersion': 1,
+            'samples': dict(sorted(Counter(s['name'] for r in records for s in r['samples']).items())),
+            'sampleEvidenceCounts': {'sampling': sum(any(s['evidence'] == 'sampling' for s in r['samples']) for r in records), 'unknown': sum(not r['samples'] for r in records)},
             'studyTypes': dict(sorted(Counter(t for r in records for t in r['studyTypes']).items())),
             'publicationTypes': dict(sorted(Counter(t for r in records for t in r['types']).items())),
             'languages': dict(sorted(Counter(r['language'] or 'Unknown' for r in records).items())),

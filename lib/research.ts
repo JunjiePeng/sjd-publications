@@ -17,6 +17,7 @@ export type Publication = {
   limitation: string;
   url: string;
   doi?: string;
+  pmid?: string;
   trial?: string;
 };
 export const publications: Publication[] = [
@@ -84,6 +85,7 @@ export const publications: Publication[] = [
       'Participants were anti-Ro IgG positive. The results do not establish efficacy in seronegative SjD or long-term disease modification.',
     url: 'https://pubmed.ncbi.nlm.nih.gov/41284548/',
     doi: '10.1016/S0140-6736(25)01430-8',
+    pmid: '41284548',
     trial: 'NCT04968912',
   },
   {
@@ -119,6 +121,7 @@ export const publications: Publication[] = [
       'A tissue association study does not prove causality or validate a test for selecting treatment. External and prospective validation is needed.',
     url: 'https://www.nature.com/articles/s41467-025-63935-9',
     doi: '10.1038/s41467-025-63935-9',
+    pmid: '40983612',
   },
   {
     id: 'nayar',
@@ -136,6 +139,7 @@ export const publications: Publication[] = [
       'The study generates mechanistic and therapeutic hypotheses; it does not demonstrate clinical benefit from targeting these structures.',
     url: 'https://www.nature.com/articles/s41467-024-54686-0',
     doi: '10.1038/s41467-024-54686-0',
+    pmid: '39747819',
   },
   {
     id: 'dazodalibep',
@@ -153,6 +157,7 @@ export const publications: Publication[] = [
       'The populations used different endpoints. These phase 2 findings require confirmation and cannot be used to rank drugs across trials.',
     url: 'https://www.nature.com/articles/s41591-024-03009-3',
     doi: '10.1038/s41591-024-03009-3',
+    pmid: '38839899',
     trial: 'NCT04129164',
   },
   {
@@ -171,6 +176,7 @@ export const publications: Publication[] = [
       'The trial was small and anti-SSA positive. Its results alone cannot establish long-term safety or generalisability.',
     url: 'https://pubmed.ncbi.nlm.nih.gov/37399108/',
     doi: '10.1093/rheumatology/kead265',
+    pmid: '37399108',
     trial: 'NCT04078386',
   },
   {
@@ -189,6 +195,7 @@ export const publications: Publication[] = [
       'This is a measurement-development study. Performance and thresholds need evaluation in the context of each trial.',
     url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC9209686/',
     doi: '10.1136/annrheumdis-2021-222054',
+    pmid: '35393271',
   },
   {
     id: 'cress',
@@ -206,6 +213,7 @@ export const publications: Publication[] = [
       'Composite measures can capture several dimensions, but different definitions can classify the same patient differently.',
     url: 'https://pubmed.ncbi.nlm.nih.gov/38287621/',
     doi: '10.1016/S2665-9913(21)00122-3',
+    pmid: '38287621',
   },
   {
     id: 'tarn',
@@ -239,6 +247,7 @@ export const publications: Publication[] = [
       'Classification criteria support consistent study populations; they are not a stand-alone diagnostic tool for an individual.',
     url: 'https://pubmed.ncbi.nlm.nih.gov/27789466/',
     doi: '10.1136/annrheumdis-2016-210571',
+    pmid: '27789466',
   },
 ];
 export const researchAreas = [

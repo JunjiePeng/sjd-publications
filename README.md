@@ -14,6 +14,8 @@ A broad, searchable catalogue of Sjögren’s publications and registered studie
 - All matching PubMed records, supplemented by Europe PMC articles and preprints, with no date, language, age or publication-type limit.
 - All matching ClinicalTrials.gov registrations, including interventional and observational studies, all recruitment statuses and studies without published results.
 - Search by title, author, journal, subject heading, DOI or PMID; filters for publication years, original publication types, study-design labels, childhood-related literature and twelve molecular/omics categories.
+- Sample-type and evidence filters across the full publication catalogue, with provenance for inferred specimens and an explicit unknown category.
+- Read/unread marks with dates, shared between catalogue and selected readings, remembered in this browser on this device. Personal marks are never committed or uploaded; clearing site data removes them.
 - An interactive overview with publication-year and omics navigation, six editorial research themes, thirteen selected references and four therapeutic programmes.
 
 The complete catalogue and the selected editorial readings are separate. Catalogue data refresh automatically; editorial interpretations remain manually reviewed and mainly adult-focused. This is broad database coverage, not a claim to every study ever conducted. See [coverage and ingestion](docs/catalogue.md).
@@ -34,7 +36,7 @@ Open the URL printed by the server, with `/sjd-publications/` appended if necess
 ```sh
 python3 -m unittest discover -s scripts -p 'test_*.py'
 python3 scripts/validate_catalogue.py
-node --experimental-strip-types --test scripts/test_filters.mjs
+node --experimental-strip-types --test scripts/test_*.mjs
 pnpm lint
 pnpm build
 ```
