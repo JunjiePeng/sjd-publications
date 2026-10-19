@@ -5,6 +5,11 @@ import {
   useReadingHistory,
 } from './reading-history';
 import { readDate } from '@/lib/reading-history';
+import {
+  publicationFormat,
+  publicationFormatLabels,
+} from '@/lib/publication-format';
+import { PublicationLinks } from './publication-links';
 import { ArrowRight, ArrowUpRight, ChevronDown, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -378,6 +383,7 @@ function Pages({
 }
 
 function PublicationCard({ record: p }: { record: CatalogueRecord }) {
+  const format = publicationFormat(p);
   return (
     <article className="publication catalogue-publication">
       <div className="publication-year">
@@ -386,14 +392,8 @@ function PublicationCard({ record: p }: { record: CatalogueRecord }) {
       </div>
       <div className="publication-body">
         <div className="pub-meta">
-          <span
-            className={`badge ${p.studyTypes.includes('Preprint') ? 'conference' : ''}`}
-          >
-            {p.studyTypes.includes('Preprint')
-              ? 'Preprint · not peer reviewed'
-              : p.types.includes('Journal Article')
-                ? 'Journal article'
-                : p.types[0] || 'Unclassified publication'}
+          <span className={`badge ${format.attention ? 'conference' : ''}`}>
+            {format.label}
           </span>
           {p.types.includes('Retracted Publication') && (
             <span className="badge conference">Retracted publication</span>
@@ -409,6 +409,10 @@ function PublicationCard({ record: p }: { record: CatalogueRecord }) {
             <ArrowUpRight size={18} />
           </a>
         </h2>
+        {format.attention && (
+          <p className="publication-format-note">{format.detail}</p>
+        )}
+        <PublicationLinks paper={p} />
         <p className="authors">{p.authors || 'Authors not supplied'}</p>
         <ReadButton paper={p} />
         <div className="topic-tags">
@@ -438,6 +442,10 @@ function PublicationCard({ record: p }: { record: CatalogueRecord }) {
           </summary>
           <div>
             <dl className="record-facts">
+              <dt>Publication format</dt>
+              <dd>
+                {format.label}. {format.detail}
+              </dd>
               <dt>Sample evidence</dt>
               <dd>
                 {p.samples?.length ? (
@@ -725,6 +733,12 @@ export function PublicationCatalogue({
         </Button>
         <Button
           variant="outline"
+          onClick={() => update({ format: 'exclude-abstracts' })}
+        >
+          Hide abstracts & posters
+        </Button>
+        <Button
+          variant="outline"
           onClick={() => {
             setFilters({ ...defaultFilters, method: 'any' });
             setPage(1);
@@ -772,6 +786,28 @@ export function PublicationCatalogue({
             </Button>
           )}
         </label>
+        <div className="publication-format-filter">
+          <CatalogueSelect
+            label="Publication format"
+            value={filters.format}
+            onChange={(format) => update({ format })}
+            options={[
+              { value: 'all', label: 'All publication formats' },
+              {
+                value: 'exclude-abstracts',
+                label: 'Hide abstracts, posters & abstract collections',
+              },
+              ...Object.entries(publicationFormatLabels).map(
+                ([value, label]) => ({ value, label }),
+              ),
+            ]}
+          />
+          <p>
+            A journal article can open on a PubMed abstract page. Check the
+            format label and access links below each title. Unclear formats
+            remain labelled; publisher access may require a subscription.
+          </p>
+        </div>
         <div className="sample-reading-filters">
           <CatalogueSelect
             label="Sample type"

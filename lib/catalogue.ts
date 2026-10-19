@@ -1,4 +1,5 @@
 import { readDate, type ReadDates } from './reading-history.ts';
+import { publicationFormat } from './publication-format.ts';
 export type SampleAnnotation = {
   name: string;
   evidence: 'sampling' | 'mention';
@@ -79,6 +80,7 @@ export type CatalogueFilters = {
   yearFrom: string;
   yearTo: string;
   publicationType: string;
+  format: string;
   sort: string;
   sample: string;
   sampleEvidence: string;
@@ -92,6 +94,7 @@ export const defaultFilters: CatalogueFilters = {
   yearFrom: '',
   yearTo: '',
   publicationType: 'all',
+  format: 'all',
   sort: 'newest',
   sample: 'all',
   sampleEvidence: 'all',
@@ -142,6 +145,10 @@ export function filterCatalogue(
           ? !!readDate(r, readDates)
           : !readDate(r, readDates))) &&
       matchesSample(r.samples || [], filters.sample, filters.sampleEvidence) &&
+      (filters.format === 'all' ||
+        (filters.format === 'exclude-abstracts'
+          ? !['abstract', 'collection'].includes(publicationFormat(r).key)
+          : publicationFormat(r).key === filters.format)) &&
       (filters.method === 'all' ||
         (filters.method === 'any'
           ? r.methods.length > 0

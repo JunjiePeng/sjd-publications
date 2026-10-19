@@ -194,3 +194,60 @@ test('read and unread filters combine with samples without losing records', () =
     0,
   );
 });
+
+test('publication format filters combine with sample and reading filters', () => {
+  const samples = [{ name: 'Serum', evidence: 'sampling', source: 'abstract' }];
+  const abstract = {
+    ...records[0],
+    id: 'pmid:101',
+    pmid: '101',
+    title: 'Sjogren trial results',
+    types: ['Journal Article', 'Abstract'],
+    studyTypes: [],
+    samples,
+  };
+  const article = {
+    ...abstract,
+    id: 'pmid:102',
+    pmid: '102',
+    types: ['Journal Article', 'English Abstract'],
+  };
+  const unknown = { ...abstract, id: 'pmid:103', pmid: '103', types: [] };
+  const fixture = [abstract, article, unknown];
+  const history = { 'pmid:101': '2026-10-19T12:00:00.000Z' };
+  assert.deepEqual(
+    filterCatalogue(
+      fixture,
+      {
+        ...defaultFilters,
+        format: 'abstract',
+        sample: 'Serum',
+        reading: 'read',
+      },
+      history,
+    ).map((r) => r.id),
+    ['pmid:101'],
+  );
+  assert.deepEqual(
+    filterCatalogue(fixture, { ...defaultFilters, format: 'article' }).map(
+      (r) => r.id,
+    ),
+    ['pmid:102'],
+  );
+  assert.equal(
+    filterCatalogue(fixture, { ...defaultFilters, format: 'exclude-abstracts' })
+      .length,
+    2,
+  );
+  assert.equal(filterCatalogue(fixture, defaultFilters).length, 3);
+});
+
+test('journal article filtering keeps a known full tissue-omics article', () => {
+  const matches = filterCatalogue(records, {
+    ...defaultFilters,
+    query: '39747819',
+    format: 'article',
+  });
+  assert.equal(matches.length, 1);
+  assert.equal(matches[0].pmid, '39747819');
+});

@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { ReadButton, ReadingStorageNote } from './reading-history';
+import { PublicationLinks } from './publication-links';
 import {
   PublicationCatalogue,
   StudyCatalogue,
@@ -651,6 +652,12 @@ export default function Home() {
                           <ArrowUpRight size={18} />
                         </a>
                       </h2>
+                      {p.kind === 'Conference abstract' && (
+                        <p className="publication-format-note">
+                          Conference abstract — not a full journal article.
+                        </p>
+                      )}
+                      <PublicationLinks paper={p} />
                       <p className="authors">{p.authors}</p>
                       <ReadButton paper={p} />
                       <p className="pub-summary">{p.summary}</p>
