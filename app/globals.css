@@ -893,6 +893,45 @@ details[open] > summary > svg {
   color: #496276;
   max-width: 950px;
 }
+.publication-format-note {
+  margin: 10px 0;
+  padding: 9px 12px;
+  border-left: 3px solid #b87a22;
+  background: #fff7e8;
+  color: #71501e;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.publication-links {
+  margin: 10px 0 12px;
+  font-size: 0.8125rem;
+}
+.publication-links p {
+  margin: 0 0 5px;
+  color: var(--muted-foreground);
+}
+.publication-links > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+}
+.publication-links a {
+  color: #245e6d;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.publication-format-filter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+  gap: 18px;
+  margin-top: 18px;
+  align-items: center;
+}
+.publication-format-filter p {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
 .paper-details {
   margin-top: 13px;
 }
@@ -1516,6 +1555,10 @@ details[open] > summary > svg {
   }
 }
 @media (max-width: 640px) {
+  .publication-format-filter {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
   .sample-reading-filters {
     grid-template-columns: 1fr;
   }

@@ -14,6 +14,7 @@ A broad, searchable catalogue of Sjögren’s publications and registered studie
 - All matching PubMed records, supplemented by Europe PMC articles and preprints, with no date, language, age or publication-type limit.
 - All matching ClinicalTrials.gov registrations, including interventional and observational studies, all recruitment statuses and studies without published results.
 - Search by title, author, journal, subject heading, DOI or PMID; filters for publication years, original publication types, study-design labels, childhood-related literature and twelve molecular/omics categories.
+- Publication-format labels and filters distinguish indexed abstracts/posters, abstract collections, conference reports/proceedings, preprints and indexed journal articles. Visible access links distinguish PubMed abstract pages from publisher and PMC text.
 - Sample-type and evidence filters across the full publication catalogue, with provenance for inferred specimens and an explicit unknown category.
 - Read/unread marks with dates, shared between catalogue and selected readings, remembered in this browser on this device. Personal marks are never committed or uploaded; clearing site data removes them.
 - An interactive overview with publication-year and omics navigation, six editorial research themes, thirteen selected references and four therapeutic programmes.
