@@ -21,8 +21,10 @@
 
 ## Personal workflow
 
-- [ ] Decide whether read/saved state should be device-local or synchronised.
-- [ ] Add saved papers and read/unread status.
+- [x] Add browser-local read/unread status, dates and catalogue filtering.
+- [x] Add sample-type filtering with metadata provenance and unknown samples.
+- [ ] Consider optional synchronisation or export of reading history.
+- [ ] Add saved papers.
 - [ ] Add “new since last visit”.
 - [ ] Consider private notes and citation export after the main workflow is tested.
 

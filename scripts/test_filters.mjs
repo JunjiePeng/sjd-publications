@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { defaultFilters, filterCatalogue, isStale } from '../lib/catalogue.ts';
+import { paperKey } from '../lib/reading-history.ts';
 
 const manifest = JSON.parse(
   readFileSync(new URL('../public/data/manifest.json', import.meta.url)),
@@ -117,5 +118,79 @@ test('stale state reflects the last successful refresh, not the last attempt', (
       Date.parse('2026-01-15'),
     ),
     false,
+  );
+});
+
+test('sample filters match snapshot totals and retain unknown records', () => {
+  assert.equal(manifest.sampleLabelsVersion, 1);
+  for (const [sample, count] of Object.entries(manifest.samples)) {
+    assert.equal(
+      filterCatalogue(records, { ...defaultFilters, sample }).length,
+      count,
+      sample,
+    );
+  }
+  assert.equal(
+    filterCatalogue(records, { ...defaultFilters, sample: 'unknown' }).length,
+    manifest.sampleEvidenceCounts.unknown,
+  );
+  assert.equal(
+    filterCatalogue(records, { ...defaultFilters, sampleEvidence: 'sampling' })
+      .length,
+    manifest.sampleEvidenceCounts.sampling,
+  );
+});
+test('sample evidence must apply to the selected specimen in combined filters', () => {
+  const mock = {
+    ...records[0],
+    samples: [
+      { name: 'Serum', evidence: 'mention', source: 'title' },
+      { name: 'Saliva', evidence: 'sampling', source: 'abstract' },
+    ],
+  };
+  assert.equal(
+    filterCatalogue([mock], {
+      ...defaultFilters,
+      sample: 'Serum',
+      sampleEvidence: 'sampling',
+    }).length,
+    0,
+  );
+  assert.equal(
+    filterCatalogue([mock], {
+      ...defaultFilters,
+      sample: 'Saliva',
+      sampleEvidence: 'sampling',
+    }).length,
+    1,
+  );
+});
+test('read and unread filters combine with samples without losing records', () => {
+  const paper = records.find((r) =>
+    r.samples?.some((s) => s.name === 'Saliva'),
+  );
+  assert.ok(paper);
+  const history = { [paperKey(paper)]: '2026-10-19T12:00:00.000Z' };
+  assert.equal(
+    filterCatalogue(records, { ...defaultFilters, reading: 'read' }, history)
+      .length,
+    1,
+  );
+  assert.equal(
+    filterCatalogue(records, { ...defaultFilters, reading: 'unread' }, history)
+      .length,
+    records.length - 1,
+  );
+  assert.equal(
+    filterCatalogue(
+      records,
+      { ...defaultFilters, reading: 'read', sample: 'Saliva' },
+      history,
+    )[0].id,
+    paper.id,
+  );
+  assert.equal(
+    filterCatalogue(records, { ...defaultFilters, reading: 'read' }, {}).length,
+    0,
   );
 });

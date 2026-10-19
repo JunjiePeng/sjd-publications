@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { ReadButton, ReadingStorageNote } from './reading-history';
 import {
   PublicationCatalogue,
   StudyCatalogue,
@@ -607,6 +608,7 @@ export default function Home() {
                 ]}
               />
             </div>
+            <ReadingStorageNote />
             <div className="publication-list">
               {records.length === 0 ? (
                 <Empty className="empty-state">
@@ -650,6 +652,7 @@ export default function Home() {
                         </a>
                       </h2>
                       <p className="authors">{p.authors}</p>
+                      <ReadButton paper={p} />
                       <p className="pub-summary">{p.summary}</p>
                       <details className="paper-details">
                         <summary>

@@ -22,6 +22,14 @@ def validate(root=None):
     assert all('abstract' not in r and 'abstractText' not in r for r in records)
     assert Counter(m for r in records for m in r['methods']) == manifest['methods']
     assert Counter(t for r in records for t in r['studyTypes']) == manifest['studyTypes']
+    assert manifest['sampleLabelsVersion'] == 1
+    assert Counter(s['name'] for r in records for s in r['samples']) == manifest['samples']
+    assert sum(not r['samples'] for r in records) == manifest['sampleEvidenceCounts']['unknown']
+    assert sum(any(s['evidence'] == 'sampling' for s in r['samples']) for r in records) == manifest['sampleEvidenceCounts']['sampling']
+    for record in records:
+        assert len({s['name'] for s in record['samples']}) == len(record['samples'])
+        assert all(set(s) == {'name', 'evidence', 'source'} and s['evidence'] in {'sampling', 'mention'} and s['source'] in {'abstract', 'title', 'indexing'} for s in record['samples'])
+        assert all(s['source'] == 'abstract' for s in record['samples'] if s['evidence'] == 'sampling')
     # Established classification, outcomes, therapeutic and tissue-omics papers.
     sentinels = {'27789466', '41284548', '39747819', '37399108', '38287621', '38229348', '33280020'}
     assert sentinels.issubset({r['pmid'] for r in records}), 'Known SjD publications are missing'

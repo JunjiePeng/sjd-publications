@@ -1,4 +1,10 @@
 import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import {
+  ReadButton,
+  ReadingStorageNote,
+  useReadingHistory,
+} from './reading-history';
+import { readDate } from '@/lib/reading-history';
 import { ArrowRight, ArrowUpRight, ChevronDown, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -404,17 +410,61 @@ function PublicationCard({ record: p }: { record: CatalogueRecord }) {
           </a>
         </h2>
         <p className="authors">{p.authors || 'Authors not supplied'}</p>
+        <ReadButton paper={p} />
         <div className="topic-tags">
           {p.methods.map((method) => (
             <span key={method}>{method}</span>
           ))}
         </div>
+        <div className="sample-tags" aria-label="Sample information">
+          <span className="sample-label">Samples · inferred</span>
+          {p.samples?.length ? (
+            p.samples.map((sample) => (
+              <span
+                key={sample.name}
+                title={`${sample.evidence === 'sampling' ? 'Sampling or assay described' : 'Mention only'} · ${sample.source}`}
+              >
+                {sample.name}
+                {sample.evidence === 'mention' ? ' · mention' : ''}
+              </span>
+            ))
+          ) : (
+            <span>Not identified in available metadata</span>
+          )}
+        </div>
         <details className="paper-details">
           <summary>
-            Study labels, dates & reference <ChevronDown size={16} />
+            Samples, study labels & reference <ChevronDown size={16} />
           </summary>
           <div>
             <dl className="record-facts">
+              <dt>Sample evidence</dt>
+              <dd>
+                {p.samples?.length ? (
+                  <ul className="sample-evidence-list">
+                    {p.samples.map((sample) => (
+                      <li key={sample.name}>
+                        {sample.name}:{' '}
+                        {sample.evidence === 'sampling'
+                          ? 'sampling or assay described'
+                          : 'mention only'}{' '}
+                        in{' '}
+                        {sample.source === 'indexing'
+                          ? 'subject headings / keywords'
+                          : `the ${sample.source}`}
+                        .
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  'No sample type identified. This does not mean no samples were used.'
+                )}
+                <p className="source-note">
+                  Inferred from available metadata, without full-text
+                  verification. Check the original methods for specimen details
+                  and whether samples are human or animal.
+                </p>
+              </dd>
               <dt>Discovery labels</dt>
               <dd>{p.studyTypes.join(' · ')}</dd>
               <dt>Indexed publication types</dt>
@@ -494,9 +544,16 @@ export function PublicationCatalogue({
   });
   const [page, setPage] = useState(1);
   const deferredFilters = useDeferredValue(filters);
+  const history = useReadingHistory();
+  const readCount = useMemo(
+    () =>
+      records?.filter((record) => readDate(record, history.dates)).length || 0,
+    [records, history.dates],
+  );
   const results = useMemo(
-    () => (records ? filterCatalogue(records, deferredFilters) : []),
-    [records, deferredFilters],
+    () =>
+      records ? filterCatalogue(records, deferredFilters, history.dates) : [],
+    [records, deferredFilters, history.dates],
   );
   const pages = Math.ceil(results.length / pageSize);
   const currentPage = Math.min(page, Math.max(1, pages));
@@ -715,6 +772,66 @@ export function PublicationCatalogue({
             </Button>
           )}
         </label>
+        <div className="sample-reading-filters">
+          <CatalogueSelect
+            label="Sample type"
+            value={filters.sample}
+            onChange={(sample) =>
+              update({
+                sample,
+                ...(sample === 'unknown' ? { sampleEvidence: 'all' } : {}),
+              })
+            }
+            options={[
+              { value: 'all', label: 'All sample types' },
+              {
+                value: 'unknown',
+                label: `Not identified (${number(manifest.sampleEvidenceCounts?.unknown ?? manifest.counts.publications)})`,
+              },
+              ...Object.entries(manifest.samples || {}).map(
+                ([sample, count]) => ({
+                  value: sample,
+                  label: `${sample} (${number(count)})`,
+                }),
+              ),
+            ]}
+          />
+          <CatalogueSelect
+            label="Sample evidence"
+            value={filters.sampleEvidence}
+            onChange={(sampleEvidence) =>
+              update({
+                sampleEvidence,
+                ...(sampleEvidence === 'sampling' &&
+                filters.sample === 'unknown'
+                  ? { sample: 'all' }
+                  : {}),
+              })
+            }
+            options={[
+              { value: 'all', label: 'Include metadata mentions' },
+              { value: 'sampling', label: 'Sampling or assay described' },
+            ]}
+          />
+          <CatalogueSelect
+            label="Reading status"
+            value={filters.reading}
+            onChange={(reading) =>
+              update({ reading: reading as CatalogueFilters['reading'] })
+            }
+            options={[
+              { value: 'all', label: 'All papers' },
+              {
+                value: 'read',
+                label: `Read${records ? ` (${number(readCount)})` : ''}`,
+              },
+              {
+                value: 'unread',
+                label: `Unread${records ? ` (${number(records.length - readCount)})` : ''}`,
+              },
+            ]}
+          />
+        </div>
         <div className="catalogue-filter-grid">
           <CatalogueSelect
             label="Study design"
@@ -796,9 +913,14 @@ export function PublicationCatalogue({
         </details>
       </div>
       <p className="source-note">
-        Design, omics and childhood labels are inferred discovery aids, not
-        manual study appraisal. All unclassified records remain included.
+        Sample, design, omics and childhood labels are inferred discovery aids.
+        “Sampling or assay described” looks for sampling or analysis language
+        near a specimen in the abstract; mentions alone do not establish that a
+        sample was used. Check the original paper’s methods. Papers without
+        identified samples remain included. Filter counts cover the whole
+        catalogue; papers may have multiple sample types.
       </p>
+      <ReadingStorageNote />
       {!records ? (
         <div className="catalogue-loading">
           {error ? (

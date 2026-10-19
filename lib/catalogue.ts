@@ -1,3 +1,9 @@
+import { readDate, type ReadDates } from './reading-history.ts';
+export type SampleAnnotation = {
+  name: string;
+  evidence: 'sampling' | 'mention';
+  source: 'abstract' | 'title' | 'indexing';
+};
 export type CatalogueRecord = {
   id: string;
   pmid: string;
@@ -17,6 +23,7 @@ export type CatalogueRecord = {
   methods: string[];
   studyTypes: string[];
   terms: string[];
+  samples?: SampleAnnotation[];
   childhood: boolean;
   language: string;
   sources: string[];
@@ -52,6 +59,9 @@ export type Manifest = {
   counts: Record<string, number>;
   years: Record<string, number>;
   methods: Record<string, number>;
+  samples?: Record<string, number>;
+  sampleLabelsVersion?: number;
+  sampleEvidenceCounts?: { sampling: number; unknown: number };
   studyTypes: Record<string, number>;
   publicationTypes: Record<string, number>;
   languages: Record<string, number>;
@@ -70,6 +80,9 @@ export type CatalogueFilters = {
   yearTo: string;
   publicationType: string;
   sort: string;
+  sample: string;
+  sampleEvidence: string;
+  reading: 'all' | 'read' | 'unread';
 };
 export const defaultFilters: CatalogueFilters = {
   query: '',
@@ -80,6 +93,9 @@ export const defaultFilters: CatalogueFilters = {
   yearTo: '',
   publicationType: 'all',
   sort: 'newest',
+  sample: 'all',
+  sampleEvidence: 'all',
+  reading: 'all',
 };
 export function normalized(value: string) {
   return value
@@ -106,6 +122,7 @@ function searchText(record: CatalogueRecord) {
         ...record.terms,
         ...record.methods,
         ...record.types,
+        ...(record.samples || []).map((sample) => sample.name),
       ].join(' '),
     );
     searchTexts.set(record, text);
@@ -115,10 +132,16 @@ function searchText(record: CatalogueRecord) {
 export function filterCatalogue(
   records: CatalogueRecord[],
   filters: CatalogueFilters,
+  readDates: ReadDates = {},
 ) {
   const words = normalized(filters.query).trim().split(/\s+/).filter(Boolean);
   const filtered = records.filter(
     (r) =>
+      (filters.reading === 'all' ||
+        (filters.reading === 'read'
+          ? !!readDate(r, readDates)
+          : !readDate(r, readDates))) &&
+      matchesSample(r.samples || [], filters.sample, filters.sampleEvidence) &&
       (filters.method === 'all' ||
         (filters.method === 'any'
           ? r.methods.length > 0
@@ -144,6 +167,19 @@ export function filterCatalogue(
         : bDate.localeCompare(aDate)) || b.id.localeCompare(a.id)
     );
   });
+}
+export function matchesSample(
+  samples: SampleAnnotation[],
+  sample: string,
+  evidence: string,
+) {
+  if (sample === 'unknown') return samples.length === 0;
+  if (sample === 'all' && evidence === 'all') return true;
+  return samples.some(
+    (annotation) =>
+      (sample === 'all' || annotation.name === sample) &&
+      (evidence === 'all' || annotation.evidence === 'sampling'),
+  );
 }
 export function formatTimestamp(value: string) {
   return (
